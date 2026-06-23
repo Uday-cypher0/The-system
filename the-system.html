@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<meta name="theme-color" content="#05070f" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="THE SYSTEM" />
+<title>THE SYSTEM — Arise</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#05070f; --bg2:#080c18;
+  --cyan:#37d6ff; --cyan-d:#0fa8df;
+  --violet:#9b6bff; --violet-d:#6f3df0;
+  --ok:#37f9b0; --warn:#ffd166; --bad:#ff4d6d;
+  --gold:#ffcf5c;
+  --panel:rgba(18,28,52,.55);
+  --panel-edge:rgba(72,160,255,.45);
+  --txt:#dbe9ff; --txt-dim:#8aa0c8; --txt-faint:#5c6f93;
+  --glow:0 0 18px rgba(55,214,255,.35);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{margin:0;padding:0;height:100%;}
+body{
+  font-family:'Rajdhani','Segoe UI',system-ui,sans-serif;
+  background:var(--bg);
+  color:var(--txt);
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+/* animated background */
+#bgfx{position:fixed;inset:0;z-index:0;overflow:hidden;background:
+  radial-gradient(1200px 700px at 50% -10%, rgba(76,46,170,.35), transparent 60%),
+  radial-gradient(900px 600px at 100% 100%, rgba(15,120,180,.25), transparent 55%),
+  linear-gradient(180deg,#05070f,#070b16 60%,#04060d);}
+#bgfx:before{content:"";position:absolute;inset:0;background-image:
+  linear-gradient(rgba(60,140,255,.05) 1px,transparent 1px),
+  linear-gradient(90deg,rgba(60,140,255,.05) 1px,transparent 1px);
+  background-size:42px 42px;mask:radial-gradient(80% 60% at 50% 30%,#000,transparent 90%);animation:drift 40s linear infinite;}
+@keyframes drift{from{background-position:0 0,0 0;}to{background-position:42px 420px,420px 42px;}}
+.scan{position:fixed;inset:0;z-index:60;pointer-events:none;background:repeating-linear-gradient(180deg,rgba(0,0,0,0) 0,rgba(0,0,0,0) 2px,rgba(0,0,0,.10) 3px);mix-blend-mode:overlay;opacity:.5;}
+#app{position:relative;z-index:2;max-width:520px;margin:0 auto;padding:14px 14px 96px;min-height:100%;}
+/* holo panel */
+.panel{position:relative;background:var(--panel);border:1px solid var(--panel-edge);border-radius:12px;padding:16px;margin:12px 0;
+  backdrop-filter:blur(7px);box-shadow:inset 0 0 30px rgba(40,90,180,.12),0 6px 24px rgba(0,0,0,.4);
+  animation:panelIn .5s cubic-bezier(.2,.8,.2,1) both;}
+.panel:before,.panel:after{content:"";position:absolute;width:14px;height:14px;border:2px solid var(--cyan);filter:drop-shadow(0 0 4px var(--cyan));}
+.panel:before{top:-1px;left:-1px;border-right:0;border-bottom:0;border-top-left-radius:6px;}
+.panel:after{bottom:-1px;right:-1px;border-left:0;border-top:0;border-bottom-right-radius:6px;}
+.panel .cbr{position:absolute;width:14px;height:14px;border:2px solid var(--cyan);filter:drop-shadow(0 0 4px var(--cyan));}
+.panel .cbr.tr{top:-1px;right:-1px;border-left:0;border-bottom:0;border-top-right-radius:6px;}
+.panel .cbr.bl{bottom:-1px;left:-1px;border-right:0;border-top:0;border-bottom-left-radius:6px;}
+@keyframes panelIn{from{opacity:0;transform:translateY(10px) scale(.99);filter:blur(3px);}to{opacity:1;transform:none;filter:none;}}
+h1,h2,h3,.orb{font-family:'Orbitron',sans-serif;letter-spacing:.06em;}
+.sys-label{font-family:'Orbitron',sans-serif;font-size:11px;letter-spacing:.34em;color:var(--cyan);text-transform:uppercase;opacity:.85;text-shadow:var(--glow);}
+.dim{color:var(--txt-dim);} .faint{color:var(--txt-faint);}
+.center{text-align:center;}
+.row{display:flex;align-items:center;gap:10px;}
+.between{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.tag{font-size:11px;letter-spacing:.12em;padding:3px 8px;border-radius:6px;border:1px solid var(--panel-edge);color:var(--cyan);text-transform:uppercase;font-family:'Orbitron';}
+
+/* header */
+.topbar{position:sticky;top:0;z-index:40;display:flex;align-items:center;justify-content:space-between;padding:10px 4px;margin:-2px 0 4px;backdrop-filter:blur(6px);}
+.brand{font-family:'Orbitron';font-weight:900;font-size:15px;letter-spacing:.2em;color:#fff;text-shadow:0 0 12px rgba(120,180,255,.7);}
+.brand span{color:var(--cyan);}
+.icbtn{width:38px;height:38px;border-radius:10px;border:1px solid var(--panel-edge);background:var(--panel);color:var(--cyan);display:grid;place-items:center;cursor:pointer;}
+.icbtn:active{transform:scale(.94);}
+
+/* status player card */
+.player{display:flex;gap:14px;align-items:center;}
+.avatar{width:74px;height:74px;border-radius:14px;flex:0 0 auto;display:grid;place-items:center;position:relative;
+  background:radial-gradient(circle at 50% 30%,rgba(120,90,255,.5),rgba(20,30,60,.6));border:1px solid var(--panel-edge);box-shadow:inset 0 0 20px rgba(80,140,255,.3),0 0 16px rgba(80,60,200,.4);}
+.avatar .lv{font-family:'Orbitron';font-weight:900;font-size:26px;color:#fff;text-shadow:0 0 12px var(--cyan);}
+.avatar .lvtag{position:absolute;bottom:-9px;left:50%;transform:translateX(-50%);font-family:'Orbitron';font-size:9px;letter-spacing:.18em;background:var(--cyan-d);color:#021018;padding:2px 7px;border-radius:5px;}
+.rankbadge{font-family:'Orbitron';font-weight:900;font-size:13px;padding:4px 10px;border-radius:8px;letter-spacing:.1em;}
+.xpbar{height:9px;border-radius:6px;background:rgba(10,20,40,.8);border:1px solid var(--panel-edge);overflow:hidden;margin-top:7px;}
+.xpfill{height:100%;background:linear-gradient(90deg,var(--cyan),var(--violet));box-shadow:0 0 12px var(--cyan);transition:width .7s cubic-bezier(.2,.8,.2,1);}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px;}
+.stat{background:rgba(10,18,38,.6);border:1px solid rgba(72,160,255,.22);border-radius:9px;padding:9px;text-align:center;}
+.stat .k{font-family:'Orbitron';font-size:9px;letter-spacing:.16em;color:var(--txt-dim);}
+.stat .v{font-family:'Orbitron';font-weight:700;font-size:20px;color:#fff;}
+.stat .v small{font-size:11px;color:var(--ok);}
+.bars{display:flex;gap:10px;margin-top:12px;}
+.vbar{flex:1;}
+.vbar .lab{font-size:11px;letter-spacing:.1em;display:flex;justify-content:space-between;color:var(--txt-dim);}
+.vbar .track{height:7px;border-radius:5px;background:rgba(10,20,40,.8);overflow:hidden;border:1px solid var(--panel-edge);margin-top:3px;}
+.vbar .f{height:100%;}
+
+/* quests */
+.quest{display:flex;align-items:center;gap:12px;padding:12px;border-radius:11px;border:1px solid rgba(72,160,255,.2);background:rgba(10,18,38,.5);margin:9px 0;transition:.25s;position:relative;overflow:hidden;}
+.quest.done{border-color:rgba(55,249,176,.5);background:rgba(20,50,42,.4);}
+.quest .qic{width:42px;height:42px;border-radius:10px;flex:0 0 auto;display:grid;place-items:center;border:1px solid var(--panel-edge);background:rgba(20,30,60,.6);}
+.quest .qic svg{width:22px;height:22px;}
+.quest .qmid{flex:1;min-width:0;}
+.quest .qn{font-weight:700;font-size:16px;}
+.quest .qd{font-size:12.5px;color:var(--txt-dim);}
+.quest .qstreak{font-size:11px;color:var(--gold);font-family:'Orbitron';letter-spacing:.05em;}
+.qcheck{width:34px;height:34px;border-radius:9px;flex:0 0 auto;border:2px solid var(--panel-edge);display:grid;place-items:center;cursor:pointer;color:var(--cyan);background:rgba(10,20,40,.5);}
+.qcheck.on{background:linear-gradient(135deg,var(--ok),#15c98a);border-color:transparent;color:#031a12;box-shadow:0 0 16px rgba(55,249,176,.5);}
+.counter{display:flex;align-items:center;gap:8px;}
+.cbtn{width:32px;height:32px;border-radius:8px;border:1px solid var(--panel-edge);background:rgba(10,20,40,.6);color:var(--cyan);font-size:20px;display:grid;place-items:center;cursor:pointer;line-height:1;}
+.cbtn:active{transform:scale(.9);}
+.cval{font-family:'Orbitron';min-width:54px;text-align:center;font-size:13px;}
+.qbtns{display:flex;gap:6px;}
+.minibtn{font-family:'Orbitron';font-size:10px;letter-spacing:.08em;padding:7px 9px;border-radius:8px;border:1px solid var(--panel-edge);background:rgba(10,20,40,.6);color:var(--cyan);cursor:pointer;}
+.minibtn.clean{color:var(--ok);border-color:rgba(55,249,176,.4);}
+.minibtn.relapse{color:var(--bad);border-color:rgba(255,77,109,.4);}
+.minibtn.on-clean{background:linear-gradient(135deg,var(--ok),#15c98a);color:#031a12;border-color:transparent;}
+.minibtn.on-relapse{background:linear-gradient(135deg,var(--bad),#c0294a);color:#fff;border-color:transparent;}
+
+.ringwrap{display:flex;align-items:center;gap:16px;}
+.ring{--p:0;width:96px;height:96px;border-radius:50%;flex:0 0 auto;display:grid;place-items:center;
+  background:radial-gradient(closest-side,var(--bg2) 78%,transparent 79% 100%),conic-gradient(var(--cyan) calc(var(--p)*1%),rgba(40,70,130,.3) 0);
+  box-shadow:0 0 22px rgba(55,214,255,.25);}
+.ring .pct{font-family:'Orbitron';font-weight:900;font-size:22px;color:#fff;}
+.ring .pl{font-size:10px;letter-spacing:.2em;color:var(--txt-dim);}
+
+.bigbtn{display:block;width:100%;font-family:'Orbitron';font-weight:700;letter-spacing:.12em;font-size:14px;padding:15px;border-radius:12px;border:1px solid var(--panel-edge);
+  background:linear-gradient(135deg,rgba(111,61,240,.5),rgba(15,168,223,.4));color:#fff;cursor:pointer;text-transform:uppercase;text-shadow:0 0 10px rgba(160,200,255,.6);box-shadow:0 0 22px rgba(80,120,255,.25);}
+.bigbtn:active{transform:scale(.98);}
+.bigbtn.ghost{background:rgba(10,20,40,.5);}
+
+/* nav */
+.nav{position:fixed;left:0;right:0;bottom:0;z-index:50;display:flex;justify-content:center;padding:8px 8px calc(8px + env(safe-area-inset-bottom));}
+.navinner{display:flex;gap:2px;background:rgba(8,14,28,.85);border:1px solid var(--panel-edge);border-radius:16px;padding:6px;backdrop-filter:blur(10px);box-shadow:0 8px 30px rgba(0,0,0,.5);max-width:506px;width:100%;justify-content:space-between;}
+.navb{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 4px;border-radius:11px;cursor:pointer;color:var(--txt-faint);transition:.2s;}
+.navb svg{width:21px;height:21px;}
+.navb .nl{font-size:9px;letter-spacing:.1em;font-family:'Orbitron';}
+.navb.active{color:var(--cyan);background:rgba(40,90,180,.18);box-shadow:inset 0 0 16px rgba(55,214,255,.18);}
+.navb.active svg{filter:drop-shadow(0 0 6px var(--cyan));}
+
+/* system message */
+.sysmsg{border-left:3px solid var(--cyan);padding:12px 14px;background:rgba(20,40,80,.35);border-radius:8px;margin:10px 0;font-size:15.5px;line-height:1.5;}
+.sysmsg .who{font-family:'Orbitron';font-size:10px;letter-spacing:.24em;color:var(--cyan);margin-bottom:5px;}
+.directive{margin-top:12px;padding:12px;border:1px dashed var(--panel-edge);border-radius:10px;background:rgba(120,90,255,.12);}
+.directive .dt{font-family:'Orbitron';font-size:10px;letter-spacing:.2em;color:var(--violet);}
+
+/* journal / inputs */
+input,textarea,select{font-family:'Rajdhani';font-size:15px;width:100%;background:rgba(8,16,34,.8);border:1px solid var(--panel-edge);border-radius:9px;color:var(--txt);padding:11px;outline:none;}
+textarea{min-height:90px;resize:vertical;}
+input:focus,textarea:focus{border-color:var(--cyan);box-shadow:var(--glow);}
+.moodrow{display:flex;gap:8px;margin:10px 0;}
+.mood{flex:1;text-align:center;padding:10px 0;border-radius:9px;border:1px solid var(--panel-edge);background:rgba(10,20,40,.5);cursor:pointer;font-family:'Orbitron';font-size:11px;letter-spacing:.05em;}
+.mood.sel{background:linear-gradient(135deg,var(--violet),var(--cyan));color:#031018;border-color:transparent;}
+.logitem{border:1px solid rgba(72,160,255,.18);border-radius:10px;padding:11px;margin:8px 0;background:rgba(10,18,38,.45);}
+.logitem .meta{font-size:11px;color:var(--txt-faint);font-family:'Orbitron';letter-spacing:.06em;display:flex;justify-content:space-between;}
+
+/* milestones */
+.ms{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid rgba(72,160,255,.12);}
+.ms .box{width:24px;height:24px;border-radius:7px;border:2px solid var(--panel-edge);display:grid;place-items:center;cursor:pointer;flex:0 0 auto;color:var(--ok);}
+.ms .box.on{background:linear-gradient(135deg,var(--ok),#15c98a);border-color:transparent;color:#031a12;}
+.ms.on .t{text-decoration:line-through;color:var(--txt-faint);}
+
+/* heatmap */
+.heat{display:grid;grid-template-columns:repeat(15,1fr);gap:4px;margin-top:10px;}
+.hc{aspect-ratio:1;border-radius:3px;background:rgba(40,70,130,.25);}
+.streakgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;}
+.scard{background:rgba(10,18,38,.5);border:1px solid rgba(72,160,255,.18);border-radius:9px;padding:10px;}
+.scard .sn{font-size:13px;color:var(--txt-dim);}
+.scard .sv{font-family:'Orbitron';font-size:20px;color:#fff;}
+.scard .sv small{font-size:11px;color:var(--gold);}
+
+/* overlays */
+.overlay{position:fixed;inset:0;z-index:200;background:rgba(2,4,10,.82);backdrop-filter:blur(6px);display:grid;place-items:center;padding:20px;animation:fade .25s both;}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.modal{max-width:440px;width:100%;}
+.levelup{text-align:center;animation:lvpop .6s cubic-bezier(.2,.9,.2,1.2) both;}
+@keyframes lvpop{0%{transform:scale(.4);opacity:0;filter:blur(8px)}60%{transform:scale(1.08)}100%{transform:scale(1);opacity:1;filter:none}}
+.levelup .big{font-family:'Orbitron';font-weight:900;font-size:44px;color:#fff;text-shadow:0 0 30px var(--cyan),0 0 60px var(--violet);letter-spacing:.08em;}
+.burst{position:fixed;inset:0;z-index:199;pointer-events:none;}
+.toast{position:fixed;left:50%;top:64px;transform:translateX(-50%);z-index:300;min-width:240px;max-width:92%;border:1px solid var(--panel-edge);background:rgba(12,22,44,.95);border-radius:11px;padding:13px 16px;box-shadow:0 10px 40px rgba(0,0,0,.6);animation:toastIn .35s both;}
+@keyframes toastIn{from{transform:translate(-50%,-16px);opacity:0}to{transform:translate(-50%,0);opacity:1}}
+.toast .tt{font-family:'Orbitron';font-size:10px;letter-spacing:.2em;color:var(--cyan);}
+.toast.loot{border-color:var(--gold);} .toast.loot .tt{color:var(--gold);}
+.toast.bad{border-color:var(--bad);} .toast.bad .tt{color:var(--bad);}
+
+.focusview{text-align:center;}
+.timer{font-family:'Orbitron';font-weight:900;font-size:64px;color:#fff;text-shadow:0 0 24px var(--cyan);letter-spacing:.04em;}
+.gatecircle{width:180px;height:180px;border-radius:50%;margin:0 auto 16px;display:grid;place-items:center;position:relative;
+  background:radial-gradient(circle,rgba(80,40,200,.4),transparent 70%);border:2px solid var(--violet);box-shadow:0 0 40px rgba(120,60,255,.5),inset 0 0 40px rgba(80,140,255,.3);animation:pulse 2.4s ease-in-out infinite;}
+@keyframes pulse{0%,100%{box-shadow:0 0 30px rgba(120,60,255,.4),inset 0 0 30px rgba(80,140,255,.25)}50%{box-shadow:0 0 60px rgba(120,60,255,.7),inset 0 0 50px rgba(80,140,255,.4)}}
+
+.intro h1{font-size:30px;margin:.2em 0;color:#fff;text-shadow:0 0 24px var(--cyan);}
+.linkrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}
+.smalllink{font-size:13px;color:var(--cyan);text-decoration:none;border:1px solid var(--panel-edge);padding:8px 11px;border-radius:8px;}
+hr.sep{border:none;border-top:1px solid rgba(72,160,255,.2);margin:14px 0;}
+.muted-note{font-size:12.5px;color:var(--txt-faint);line-height:1.5;}
+::-webkit-scrollbar{width:8px;height:8px;}::-webkit-scrollbar-thumb{background:rgba(72,160,255,.3);border-radius:4px;}
+</style>
+</head>
+<body>
+<div id="bgfx"></div>
+<div class="scan"></div>
+<canvas class="burst" id="burst"></canvas>
+
+<div id="app"></div>
+
+<div class="nav"><div class="navinner" id="nav"></div></div>
+
+<script>
+"use strict";
+/* ============================================================= THE SYSTEM ============================================================= */
+const ICONS={
+  water:'<svg viewBox="0 0 24 24" fill="none" stroke="#37d6ff" stroke-width="1.8"><path d="M12 3c3 4 6 7 6 11a6 6 0 1 1-12 0c0-4 3-7 6-11Z"/></svg>',
+  walk:'<svg viewBox="0 0 24 24" fill="none" stroke="#37f9b0" stroke-width="1.8"><circle cx="13" cy="4.5" r="1.8"/><path d="M11 9l-2 5 3 2 1 5M11 9l4 1 2 3M9 14l-2 6"/></svg>',
+  sleep:'<svg viewBox="0 0 24 24" fill="none" stroke="#9b6bff" stroke-width="1.8"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5Z"/></svg>',
+  meditate:'<svg viewBox="0 0 24 24" fill="none" stroke="#9b6bff" stroke-width="1.8"><circle cx="12" cy="6" r="2.2"/><path d="M12 9c-1 2-1 3-4 4-3 1-4 4 .5 4 2 0 2.5-1.5 3.5-1.5s1.5 1.5 3.5 1.5c4.5 0 3.5-3 .5-4-3-1-3-2-4-4Z"/></svg>',
+  journal:'<svg viewBox="0 0 24 24" fill="none" stroke="#9b6bff" stroke-width="1.8"><path d="M5 4h11l3 3v13H5z"/><path d="M8 9h8M8 13h8M8 17h5"/></svg>',
+  read:'<svg viewBox="0 0 24 24" fill="none" stroke="#ffcf5c" stroke-width="1.8"><path d="M3 5c3-1 6-1 9 1 3-2 6-2 9-1v13c-3-1-6-1-9 1-3-2-6-2-9-1Z"/><path d="M12 7v12"/></svg>',
+  nopmo:'<svg viewBox="0 0 24 24" fill="none" stroke="#ff4d6d" stroke-width="1.8"><path d="M12 3l8 3v6c0 5-4 8-8 9-4-1-8-4-8-9V6Z"/><path d="M9 12l2 2 4-4"/></svg>',
+  nodoom:'<svg viewBox="0 0 24 24" fill="none" stroke="#ffd166" stroke-width="1.8"><rect x="7" y="3" width="10" height="18" rx="2"/><path d="M5 5l14 14"/></svg>',
+  workout:'<svg viewBox="0 0 24 24" fill="none" stroke="#37f9b0" stroke-width="1.8"><path d="M4 9v6M7 7v10M17 7v10M20 9v6M7 12h10"/></svg>',
+  deepwork:'<svg viewBox="0 0 24 24" fill="none" stroke="#37d6ff" stroke-width="1.8"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.4"/><path d="M12 1v3M12 20v3M23 12h-3M4 12H1"/></svg>',
+  status:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="3.4"/><path d="M5 20c0-4 3-6 7-6s7 2 7 6"/></svg>',
+  quests:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 4h14v16l-7-3-7 3z"/><path d="M9 9l2 2 4-4"/></svg>',
+  system:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>',
+  log:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3h9l4 4v14H6z"/><path d="M9 12h7M9 16h7M9 8h4"/></svg>',
+  goals:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 21V4l8 2-2 3 2 3-8-2"/></svg>',
+  archive:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16M6 7v13h12V7M9 11h6"/><path d="M4 4h16v3H4z"/></svg>',
+  gear:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></svg>',
+};
+
+const HABITS=[
+  {id:'water',name:'Hydration',desc:'Drink 3L (12 cups) of water',type:'count',goal:12,unit:'cup',stat:'VIT',cat:'Vitals'},
+  {id:'walk',name:'Movement',desc:'Get outside for a walk',type:'done',stat:'AGI',cat:'Vitals'},
+  {id:'sleep',name:'Recovery',desc:'7–8 hours of real sleep',type:'done',stat:'VIT',cat:'Vitals'},
+  {id:'meditate',name:'Stillness',desc:'Meditate / breathe 10 min',type:'done',stat:'SEN',cat:'Mind'},
+  {id:'journal',name:"Hunter's Log",desc:'Write one log entry',type:'done',stat:'SEN',cat:'Mind'},
+  {id:'read',name:'Knowledge',desc:'Read 20 minutes',type:'done',stat:'INT',cat:'Mind'},
+  {id:'nopmo',name:'No Porn',desc:'Stay clean — declare the day',type:'quit',stat:'WIL',cat:'Will'},
+  {id:'nodoom',name:'No Doomscroll',desc:'No mindless feed scrolling',type:'quit',stat:'WIL',cat:'Will'},
+  {id:'workout',name:'Iron',desc:'Train your body',type:'done',stat:'STR',cat:'Body'},
+  {id:'deepwork',name:'Deep Work',desc:'Clear a 25-min focus dungeon',type:'count',goal:1,unit:'raid',stat:'INT',cat:'Body'},
+];
+const STAT_NAMES={STR:'Strength',VIT:'Vitality',AGI:'Agility',INT:'Intelligence',SEN:'Sense',WIL:'Will'};
+const RANKS=[{min:0,r:'E',c:'#7d8aa3'},{min:5,r:'D',c:'#37f9b0'},{min:10,r:'C',c:'#37d6ff'},{min:17,r:'B',c:'#6f9bff'},{min:26,r:'A',c:'#9b6bff'},{min:40,r:'S',c:'#ffcf5c'}];
+
+/* ---------- state ---------- */
+const KEY='thesystem.v1';
+let S=load();
+function blank(){
+  return {name:'Player',created:todayISO(),lastDate:todayISO(),xp:0,
+    stats:{STR:10,VIT:10,AGI:10,INT:10,SEN:10,WIL:10},
+    history:{},best:{},awarded:{},logs:[],quests:[],
+    title:'The Awakened',sound:true,seenIntro:false,view:'status',pending:[]};
+}
+function load(){try{const d=JSON.parse(localStorage.getItem(KEY));if(d&&d.stats)return Object.assign(blank(),d);}catch(e){}return blank();}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+
+/* ---------- date helpers ---------- */
+function todayISO(d){d=d||new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function shift(iso,n){const p=iso.split('-');const d=new Date(+p[0],+p[1]-1,+p[2]);d.setDate(d.getDate()+n);return todayISO(d);}
+
+/* ---------- habit logic ---------- */
+function H(id){return HABITS.find(h=>h.id===id);}
+function val(id,date){return (S.history[id]||{})[date];}
+function meets(id,date){const h=H(id);const v=val(id,date);if(v==null)return false;if(h.type==='count')return typeof v==='number'&&v>=h.goal;if(h.type==='quit')return v==='clean';return v===true;}
+function streak(id){let s=0;let d=todayISO();if(!meets(id,d))d=shift(d,-1);while(meets(id,d)){s++;d=shift(d,-1);}return s;}
+function dayPct(date){date=date||todayISO();let done=0;HABITS.forEach(h=>{if(meets(h.id,date))done++;});return Math.round(done/HABITS.length*100);}
+
+/* ---------- xp / level / rank ---------- */
+function levelInfo(xp){let lvl=1,need=120,rem=xp;while(rem>=need){rem-=need;lvl++;need=Math.round(need*1.32);}return {lvl,into:rem,need};}
+function rankFor(lvl){let r=RANKS[0];for(const x of RANKS)if(lvl>=x.min)r=x;return r;}
+function addXP(n){const before=levelInfo(S.xp).lvl;S.xp=Math.max(0,S.xp+n);const after=levelInfo(S.xp).lvl;if(after>before)onLevelUp(after);}
+function addStat(k,n){S.stats[k]=(S.stats[k]||10)+n;}
+
+/* ---------- sound ---------- */
+let AC;function actx(){if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)();}catch(e){}}return AC;}
+function beep(freq,dur,type,vol){if(!S.sound)return;const c=actx();if(!c)return;const o=c.createOscillator(),g=c.createGain();o.type=type||'sine';o.frequency.value=freq;g.gain.value=vol||0.05;o.connect(g);g.connect(c.destination);const t=c.currentTime;o.start(t);g.gain.setValueAtTime(g.gain.value,t);g.gain.exponentialRampToValueAtTime(0.0001,t+(dur||0.15));o.stop(t+(dur||0.15));}
+function sfxOk(){beep(740,0.09,'triangle',0.05);setTimeout(()=>beep(990,0.12,'triangle',0.05),70);}
+function sfxLoot(){beep(880,0.08,'square',0.04);setTimeout(()=>beep(1320,0.1,'square',0.04),80);setTimeout(()=>beep(1760,0.14,'square',0.04),170);}
+function sfxLevel(){[523,659,784,1046].forEach((f,i)=>setTimeout(()=>beep(f,0.22,'sawtooth',0.045),i*110));}
+function sfxBad(){beep(180,0.18,'sawtooth',0.05);}
+
+/* ============================================================= RENDER ============================================================= */
+const app=document.getElementById('app');
+const NAVS=[['status','Status'],['quests','Quests'],['system','System'],['log','Log'],['goals','Goals'],['archive','Data']];
+function render(){
+  rollover();
+  if(!S.seenIntro){renderIntro();return;}
+  document.getElementById('nav').innerHTML=NAVS.map(([k,l])=>`<div class="navb ${S.view===k?'active':''}" data-act="nav:${k}">${ICONS[k]}<span class="nl">${l}</span></div>`).join('');
+  const v=S.view;
+  app.innerHTML=topbar()+({status:vStatus,quests:vQuests,system:vSystem,log:vLog,goals:vGoals,archive:vArchive}[v]||vStatus)();
+  save();
+}
+function topbar(){
+  const li=levelInfo(S.xp);const rk=rankFor(li.lvl);
+  return `<div class="topbar">
+    <div class="brand">THE <span>SYSTEM</span></div>
+    <div class="row"><div class="rankbadge" style="border:1px solid ${rk.c};color:${rk.c};box-shadow:0 0 14px ${rk.c}55">RANK ${rk.r}</div>
+    <div class="icbtn" data-act="settings">${ICONS.gear}</div></div></div>`;
+}
+
+/* ---------- intro ---------- */
+function renderIntro(){
+  document.getElementById('nav').innerHTML='';
+  app.innerHTML=`<div style="height:8vh"></div>
+  <div class="panel intro center"><span class="cbr tr"></span><span class="cbr bl"></span>
+    <div class="sys-label">System Notification</div>
+    <h1>YOU HAVE BEEN<br>CHOSEN AS A PLAYER</h1>
+    <p class="dim" style="font-size:16px;line-height:1.6">Most people drift. A Player levels up.<br>From today, your real life is the dungeon — and the System is watching.</p>
+    <hr class="sep">
+    <p class="muted-note" style="text-align:left">Each day the System issues <b style="color:var(--cyan)">Daily Quests</b> — your habits. Clear them to gain XP, raise your stats, and climb from Rank E to Rank S. Break your quit-streaks and the System won't pity you — it will tell you to rise.</p>
+    <div style="margin:14px 0 6px;text-align:left">
+      <div class="sys-label" style="margin-bottom:6px">Enter your name, Player</div>
+      <input id="introName" placeholder="Your name" value="${esc(S.name==='Player'?'':S.name)}">
+    </div>
+    <button class="bigbtn" data-act="begin" style="margin-top:12px">⟶ Arise</button>
+    <p class="muted-note" style="margin-top:14px">This is your private app — everything stays on this device. If life ever gets heavier than the game, that's real and it's okay to reach a human: <b>Vandrevala +91 9999 666 555</b> · <b>Tele-MANAS 14416</b>.</p>
+  </div>`;
+}
+
+/* ---------- STATUS ---------- */
+function vStatus(){
+  const li=levelInfo(S.xp);const rk=rankFor(li.lvl);const pct=Math.round(li.into/li.need*100);
+  const ds=daySaverStreak();
+  const statHTML=Object.keys(STAT_NAMES).map(k=>`<div class="stat"><div class="k">${k}</div><div class="v">${S.stats[k]}</div></div>`).join('');
+  // vitality-ish flavor bars from today
+  const focusPct=dayPct();const willStreak=Math.max(streak('nopmo'),streak('nodoom'));
+  return `<div class="panel"><span class="cbr tr"></span><span class="cbr bl"></span>
+    <div class="sys-label">Player Status</div>
+    <div class="player" style="margin-top:10px">
+      <div class="avatar"><div class="lv">${li.lvl}</div><div class="lvtag">LEVEL</div></div>
+      <div style="flex:1;min-width:0">
+        <div class="between"><div style="font-family:'Orbitron';font-weight:700;font-size:19px;color:#fff">${esc(S.name)}</div></div>
+        <div class="dim" style="font-size:13px;margin-top:2px">${esc(S.title)} · Rank ${rk.r} Hunter</div>
+        <div class="xpbar"><div class="xpfill" style="width:${pct}%"></div></div>
+        <div class="faint" style="font-size:11px;margin-top:4px;font-family:'Orbitron';letter-spacing:.05em">XP ${li.into} / ${li.need}</div>
+      </div>
+    </div>
+    <div class="stats">${statHTML}</div>
+    <div class="bars">
+      <div class="vbar"><div class="lab"><span>TODAY</span><span>${focusPct}%</span></div><div class="track"><div class="f" style="width:${focusPct}%;background:linear-gradient(90deg,var(--cyan),var(--ok))"></div></div></div>
+      <div class="vbar"><div class="lab"><span>WILL STREAK</span><span>${willStreak}d</span></div><div class="track"><div class="f" style="width:${Math.min(100,willStreak/30*100)}%;background:linear-gradient(90deg,var(--violet),var(--bad))"></div></div></div>
+    </div>
+  </div>
+  <div class="panel"><div class="sys-label">Hunter Record</div>
+    <div class="streakgrid" style="margin-top:10px">
+      <div class="scard"><div class="sn">Day Streak</div><div class="sv">${ds}<small> days</small></div></div>
+      <div class="scard"><div class="sn">Total XP</div><div class="sv">${S.xp}</div></div>
+      <div class="scard"><div class="sn">Quests Cleared</div><div class="sv">${questsCleared()}</div></div>
+      <div class="scard"><div class="sn">Days Awakened</div><div class="sv">${daysSince(S.created)+1}</div></div>
+    </div>
+    <button class="bigbtn" data-act="nav:quests" style="margin-top:14px">⟶ Today's Daily Quest</button>
+  </div>`;
+}
+function daysSince(iso){return Math.max(0,Math.round((new Date(todayISO())-new Date(iso))/864e5));}
+function daySaverStreak(){let s=0;let d=todayISO();const ok=x=>dayPct(x)>=60;if(!ok(d))d=shift(d,-1);while(ok(d)){s++;d=shift(d,-1);}return s;}
+function questsCleared(){let n=0;Object.keys(S.history).forEach(id=>{const m=S.history[id];Object.keys(m).forEach(dt=>{if(meets(id,dt))n++;});});return n;}
+
+/* ---------- QUESTS ---------- */
+function vQuests(){
+  const pct=dayPct();const today=todayISO();
+  const remaining=HABITS.filter(h=>!meets(h.id,today)).length;
+  const cats=['Vitals','Mind','Will','Body'];
+  let body='';
+  cats.forEach(cat=>{
+    body+=`<div class="sys-label" style="margin:14px 2px 2px">${cat}</div>`;
+    HABITS.filter(h=>h.cat===cat).forEach(h=>{body+=questRow(h,today);});
+  });
+  const msLeft=msToMidnight();
+  return `<div class="panel"><span class="cbr tr"></span><span class="cbr bl"></span>
+    <div class="sys-label">⚠ Daily Quest — Clear before reset</div>
+    <div class="ringwrap" style="margin-top:12px">
+      <div class="ring" style="--p:${pct}"><div style="text-align:center"><div class="pct">${pct}%</div><div class="pl">CLEARED</div></div></div>
+      <div style="flex:1">
+        <div style="font-size:16px;line-height:1.45">${remaining===0?'<b style="color:var(--ok)">All quests cleared. Flawless, Hunter.</b>':`<b style="color:#fff">${remaining}</b> quest${remaining>1?'s':''} remain. <span class="dim">The System resets at midnight.</span>`}</div>
+        <div class="faint" style="font-family:'Orbitron';font-size:12px;margin-top:8px;letter-spacing:.06em">RESET IN ${msLeft}</div>
+      </div>
+    </div>
+  </div>
+  <button class="bigbtn" data-act="focus" style="margin:2px 0 4px">⚔ Enter Focus Dungeon (25:00)</button>
+  ${body}`;
+}
+function questRow(h,today){
+  const done=meets(h.id,today);const st=streak(h.id);
+  let control='';
+  if(h.type==='done'){
+    control=`<div class="qcheck ${done?'on':''}" data-act="toggle:${h.id}">${done?'✓':''}</div>`;
+  }else if(h.type==='count'){
+    const cur=val(h.id,today)||0;
+    control=`<div class="counter"><div class="cbtn" data-act="dec:${h.id}">−</div><div class="cval">${cur}/${h.goal}</div><div class="cbtn" data-act="inc:${h.id}">+</div></div>`;
+  }else if(h.type==='quit'){
+    const v=val(h.id,today);
+    control=`<div class="qbtns"><div class="minibtn clean ${v==='clean'?'on-clean':''}" data-act="clean:${h.id}">CLEAN</div><div class="minibtn relapse ${v==='relapse'?'on-relapse':''}" data-act="relapse:${h.id}">FELL</div></div>`;
+  }
+  return `<div class="quest ${done?'done':''}">
+    <div class="qic">${ICONS[h.id]}</div>
+    <div class="qmid"><div class="qn">${h.name}</div><div class="qd">${h.desc}</div>${st>0?`<div class="qstreak">▲ ${st}-day streak${H(h.id).type==='quit'?' clean':''}</div>`:''}</div>
+    ${control}
+  </div>`;
+}
+function msToMidnight(){const n=new Date();const m=new Date(n);m.setHours(24,0,0,0);let s=Math.floor((m-n)/1000);const hh=String(Math.floor(s/3600)).padStart(2,'0');s%=3600;const mm=String(Math.floor(s/60)).padStart(2,'0');return hh+':'+mm;}
+
+/* ---------- SYSTEM (coach) ---------- */
+function vSystem(){
+  const c=systemMessage();
+  return `<div class="panel"><span class="cbr tr"></span><span class="cbr bl"></span>
+    <div class="sys-label">System Transmission</div>
+    <div class="sysmsg"><div class="who">◤ THE SYSTEM ◢</div>${c.body}</div>
+    <div class="directive"><div class="dt">▸ DIRECTIVE</div><div style="margin-top:6px;font-size:16px">${c.focus}</div></div>
+    <button class="bigbtn ghost" data-act="recoach" style="margin-top:14px">↻ Request New Transmission</button>
+  </div>
+  <div class="panel"><div class="sys-label">Why the System works on you</div>
+    <p class="muted-note" style="margin-top:8px">It hijacks the same loops your bad habits use — a clear cue (the daily quest), a small action, an instant reward (XP, level-ups, loot), and a streak you don't want to break. You're not fighting your brain's wiring. You're pointing it at the life you actually want.</p>
+  </div>`;
+}
+function systemMessage(){
+  const hr=new Date().getHours();const pct=dayPct();const today=todayISO();
+  const relapsedToday=HABITS.some(h=>h.type==='quit'&&val(h.id,today)==='relapse');
+  const ds=daySaverStreak();const li=levelInfo(S.xp);
+  const weak=HABITS.filter(h=>!meets(h.id,today)).sort((a,b)=>streak(a.id)-streak(b.id))[0];
+  const recentMood=S.logs.slice(-3).map(l=>l.mood).filter(m=>m!=null);
+  const lowMood=recentMood.length&&recentMood.reduce((a,b)=>a+b,0)/recentMood.length<=2;
+  let body,focus;
+  if(relapsedToday){
+    body=pick(["You fell today. Noted. The System does not record shame — only data. Every S-rank Hunter has a kill-count of failures behind them. What separates you is the next 10 minutes.","A relapse is a single data point, not a verdict. Weak Hunters quit after a fall. You are going to log it, breathe, and clear one more quest before you sleep.","You broke the streak. Fine. Streaks are cheap; the man who rebuilds them is not. Reset starts now, not Monday."]);
+    focus="Clear ONE small quest right now — Hydration or a 10-minute walk. Re-enter the system before the day closes.";
+  } else if(lowMood){
+    body=pick(["Your logs read heavy. The System notes it. You don't have to win today — you only have to not disappear. Clear the smallest quest. Movement first, motivation later.","Low energy detected. This is when Hunters lower the bar instead of dropping out. One quest. The smallest one. That's the whole mission today.","Heavy days are part of the climb, not a sign you've failed it. Be gentle with the Player — then give him one easy win."]);
+    focus="Pick the lightest quest on the board and clear only that. If the weight is real, a human helps: Vandrevala +91 9999 666 555.";
+  } else if(pct>=100){
+    body=pick(["All quests cleared. This is what Rank-up looks like from the inside — boring, repeatable, undeniable. Bank it and protect tomorrow.","Flawless clear. The System is recalculating your ceiling upward. Do not celebrate into a relapse — close the day clean.","100%. You just proved the version of you that you keep saying you'll 'become someday' is available today."]);
+    focus="Protect the win: lights down, no late-night feed. Tomorrow's quest is already loading.";
+  } else if(hr<12){
+    body=pick(["Morning, Player. The board is full and untouched — exactly how a clean climb begins. Win the first quest before the world wakes up and the day bends to you.","A new day, a fresh dungeon. The Hunters who lose are the ones who 'start later.' Start the smallest quest in the next 5 minutes.","Dawn directive: hydrate, move, then think. Your stats don't rise from planning — they rise from clearing."]);
+    focus="Stack an early win: down one cup of water and mark Hydration now. Momentum compounds.";
+  } else if(pct<40&&hr>=16){
+    body=pick(["The day is slipping and the board is mostly red. This is the exact moment that decides the kind of week you have. Don't aim for perfect — aim for moving.","Afternoon check: low clear-rate detected. Stop negotiating with yourself. Pick one quest, do it badly, mark it.","You still have hours. Hunters who finish strong make today's loss tomorrow's data, not their identity."]);
+    focus=weak?`Target now: ${weak.name}. Just begin it — done beats perfect.`:"Clear any two quests before dinner.";
+  } else {
+    body=pick(["Steady climb, Player. You're at "+pct+"% — above the line where most people fold. Keep stacking. Rank S was never one heroic day; it's a thousand quiet ones.","The System sees consistency forming. Level "+li.lvl+", a "+ds+"-day run. This is how an ordinary person quietly becomes dangerous.","No drama today, just progress. That's the cheat code nobody believes because it's too simple. Clear the next quest."]);
+    focus=weak?`Close the gap on ${weak.name} next, then protect your streaks.`:"Finish the board and bank a clean day.";
+  }
+  return {body,focus};
+}
+function pick(a){return a[Math.floor(Math.random()*a.length)];}
+
+/* ---------- LOG (journal) ---------- */
+function vLog(){
+  const prompts=["What drained me today, and what did I let it cost me?","One thing I'm proud of, even if it's small.","What would the Rank-S version of me have done differently today?","What am I avoiding — and what's the smallest first step?","What went right that I'd normally ignore?"];
+  const items=S.logs.slice().reverse().slice(0,40).map(l=>`<div class="logitem"><div class="meta"><span>${l.date}</span><span>${moodLabel(l.mood)}</span></div><div style="margin-top:6px;white-space:pre-wrap">${esc(l.text)}</div></div>`).join('')||'<p class="faint">No entries yet. Your log is how the System reads your mind.</p>';
+  return `<div class="panel"><span class="cbr tr"></span><span class="cbr bl"></span>
+    <div class="sys-label">Hunter's Log — New Entry</div>
+    <p class="dim" style="font-size:13px;margin:8px 0 4px">Prompt: ${pick(prompts)}</p>
+    <textarea id="logText" placeholder="Speak freely. Nobody reads this but you and the System."></textarea>
+    <div class="moodrow">
+      ${[[1,'Crushed'],[2,'Low'],[3,'Flat'],[4,'Good'],[5,'Locked In']].map(([n,l])=>`<div class="mood" data-act="mood:${n}" data-mood="${n}">${l}</div>`).join('')}
+    </div>
+    <button class="bigbtn" data-act="savelog">⟶ Log Entry (+ clears Hunter's Log quest)</button>
+  </div>
+  <div class="panel"><div class="sys-label">Past Entries</div><div style="margin-top:8px">${items}</div></div>`;
+}
+let pendingMood=null;
+function moodLabel(m){return {1:'⬤ Crushed',2:'⬤ Low',3:'⬤ Flat',4:'⬤ Good',5:'⬤ Locked In'}[m]||'';}
+
+/* ---------- GOALS (main quests) ---------- */
+function vGoals(){
+  const list=S.quests.map((q,qi)=>{
+    const total=q.milestones.length;const done=q.milestones.filter(m=>m.done).length;
+    const ms=q.milestones.map((m,mi)=>`<div class="ms ${m.done?'on':''}"><div class="box ${m.done?'on':''}" data-act="ms:${qi}:${mi}">${m.done?'✓':''}</div><div class="t">${esc(m.text)}</div></div>`).join('');
+    return `<div class="panel"><div class="between"><div class="sys-label">Main Quest</div><div class="tag">${done}/${total}</div></div>
+      <div style="font-family:'Orbitron';font-size:18px;color:#fff;margin:8px 0 2px">${esc(q.title)}</div>
+      ${q.why?`<div class="dim" style="font-size:13px">Why: ${esc(q.why)}</div>`:''}
+      <div class="xpbar" style="margin:10px 0"><div class="xpfill" style="width:${total?done/total*100:0}%"></div></div>
+      ${ms}
+      <div class="row" style="margin-top:10px"><input id="msi_${qi}" placeholder="Add a milestone…" style="flex:1"><button class="minibtn" data-act="addms:${qi}">ADD</button></div>
+    </div>`;
+  }).join('');
+  return `<div class="panel"><span class="cbr tr"></span><span class="cbr bl"></span>
+    <div class="sys-label">Forge a Main Quest</div>
+    <p class="dim" style="font-size:13px;margin:8px 0">The big ones. The business. The surgery fund. Getting your mother out. Name it, then break it into milestones the System can track.</p>
+    <input id="gTitle" placeholder="Main quest title (e.g. Launch first business)">
+    <input id="gWhy" placeholder="Why it matters (your real reason)" style="margin-top:8px">
+    <button class="bigbtn" data-act="addgoal" style="margin-top:10px">⟶ Register Main Quest</button>
+  </div>${list||'<p class="faint center">No main quests yet.</p>'}`;
+}
+
+/* ---------- ARCHIVE (stats) ---------- */
+function vArchive(){
+  const days=[];for(let i=44;i>=0;i--)days.push(shift(todayISO(),-i));
+  const heat=days.map(d=>{const p=dayPct(d);const a=p/100;const col=p===0?'rgba(40,70,130,.22)':`rgba(55,214,255,${0.18+a*0.8})`;return `<div class="hc" title="${d}: ${p}%" style="background:${col};box-shadow:${p>=100?'0 0 8px var(--cyan)':'none'}"></div>`;}).join('');
+  const sc=HABITS.map(h=>`<div class="scard"><div class="sn">${h.name}</div><div class="sv">${streak(h.id)}<small> now</small> · ${S.best[h.id]||0}<small> best</small></div></div>`).join('');
+  return `<div class="panel"><span class="cbr tr"></span><span class="cbr bl"></span>
+    <div class="sys-label">Clear-Rate — Last 45 Days</div>
+    <div class="heat">${heat}</div>
+    <div class="faint" style="font-size:11px;margin-top:10px">Brighter = more quests cleared that day. Glowing = flawless clear.</div>
+  </div>
+  <div class="panel"><div class="sys-label">Streak Ledger</div><div class="streakgrid">${sc}</div></div>`;
+}
+
+/* ============================================================= ACTIONS ============================================================= */
+document.addEventListener('click',e=>{
+  const t=e.target.closest('[data-act]');if(!t)return;
+  const act=t.getAttribute('data-act');const [cmd,a,b]=act.split(':');
+  if(cmd==='begin'){const nm=(document.getElementById('introName')||{}).value||'';S.name=nm.trim()||'Player';S.seenIntro=true;S.view='quests';sfxLevel();render();return;}
+  if(cmd==='nav'){S.view=a;render();window.scrollTo(0,0);return;}
+  if(cmd==='settings'){openSettings();return;}
+  if(cmd==='closeModal'){closeModal();return;}
+  if(cmd==='toggle'){toggleDone(a);return;}
+  if(cmd==='inc'){changeCount(a,1);return;}
+  if(cmd==='dec'){changeCount(a,-1);return;}
+  if(cmd==='clean'){setQuit(a,'clean');return;}
+  if(cmd==='relapse'){setQuit(a,'relapse');return;}
+  if(cmd==='mood'){pendingMood=+a;document.querySelectorAll('.mood').forEach(m=>m.classList.toggle('sel',+m.getAttribute('data-mood')===pendingMood));return;}
+  if(cmd==='savelog'){saveLog();return;}
+  if(cmd==='recoach'){render();return;}
+  if(cmd==='addgoal'){addGoal();return;}
+  if(cmd==='addms'){addMilestone(+a);return;}
+  if(cmd==='ms'){toggleMilestone(+a,+b);return;}
+  if(cmd==='focus'){openFocus();return;}
+  if(cmd==='focusCancel'){closeFocus(false);return;}
+  if(cmd==='focusDone'){closeFocus(true);return;}
+  if(cmd==='soundtoggle'){S.sound=!S.sound;save();openSettings();return;}
+  if(cmd==='install'){openInstall();return;}
+  if(cmd==='rename'){const v=(document.getElementById('setName')||{}).value;if(v&&v.trim()){S.name=v.trim();save();}closeModal();render();return;}
+  if(cmd==='reset'){if(confirm('Reset ALL progress? This wipes your level, streaks, logs and quests. Cannot be undone.')){S=blank();S.seenIntro=true;save();closeModal();render();}return;}
+});
+document.addEventListener('keydown',e=>{if(e.key==='Enter'){const id=document.activeElement&&document.activeElement.id;if(id==='gTitle'||id==='gWhy'){addGoal();}else if(id&&id.indexOf('msi_')===0){addMilestone(+id.split('_')[1]);}else if(id==='introName'){const b=document.querySelector('[data-act="begin"]');if(b)b.click();}}});
+
+function markBest(id){const s=streak(id);if(s>(S.best[id]||0))S.best[id]=s;}
+function awardOnce(id){if(!S.awarded[id])S.awarded[id]={};const d=todayISO();if(S.awarded[id][d])return false;S.awarded[id][d]=true;return true;}
+function unaward(id){const d=todayISO();if(S.awarded[id])delete S.awarded[id][d];}
+
+function toggleDone(id){const h=H(id);const d=todayISO();if(!S.history[id])S.history[id]={};const now=!meets(id,d);S.history[id][d]=now;
+  if(now){if(awardOnce(id)){addXP(20);addStat(h.stat,1);}sfxOk();markBest(id);loot();flash(id);checkPerfect();}else{unaward(id);addXP(-20);addStat(h.stat,-1);}
+  save();render();}
+function changeCount(id,delta){const h=H(id);const d=todayISO();if(!S.history[id])S.history[id]={};let cur=val(id,d)||0;const wasGoal=cur>=h.goal;cur=Math.max(0,Math.min(h.goal*2,cur+delta));S.history[id][d]=cur;
+  const isGoal=cur>=h.goal;
+  if(delta>0){addXP(3);sfxOk();}else{addXP(-3);}
+  if(isGoal&&!wasGoal){if(awardOnce(id)){addXP(14);addStat(h.stat,1);}markBest(id);loot();checkPerfect();}
+  if(!isGoal&&wasGoal){unaward(id);addStat(h.stat,-1);addXP(-14);}
+  save();render();}
+function setQuit(id,vv){const h=H(id);const d=todayISO();if(!S.history[id])S.history[id]={};const prev=val(id,d);
+  if(prev===vv){delete S.history[id][d];if(vv==='clean'){unaward(id);addXP(-25);addStat('WIL',-1);}save();render();return;}
+  S.history[id][d]=vv;
+  if(vv==='clean'){if(awardOnce(id)){addXP(25);addStat('WIL',1);}sfxOk();markBest(id);loot();checkPerfect();}
+  else{ // relapse
+    if(prev==='clean'){unaward(id);addXP(-25);addStat('WIL',-1);}
+    sfxBad();toast('bad','STREAK BROKEN','Logged. No shame in the data. Rise — clear one quest now.');
+    S.view='system';
+  }
+  save();render();}
+function loot(){if(Math.random()<0.16){const bonus=10+Math.floor(Math.random()*26);addXP(bonus);sfxLoot();toast('loot','✦ LOOT ACQUIRED','+'+bonus+' bonus XP. The System favors the consistent.');}}
+function checkPerfect(){if(dayPct()>=100){if(!S._perfDay||S._perfDay!==todayISO()){S._perfDay=todayISO();addXP(50);toast('loot','◆ FLAWLESS CLEAR','+50 XP. Every quest cleared. Bank it, Hunter.');}}}
+function flash(id){}
+
+function saveLog(){const ta=document.getElementById('logText');const txt=(ta&&ta.value||'').trim();if(!txt){toast('bad','EMPTY','Write something first, Player.');return;}
+  S.logs.push({date:todayISO(),mood:pendingMood,text:txt});pendingMood=null;
+  // clears journal quest
+  const d=todayISO();if(!S.history.journal)S.history.journal={};if(!meets('journal',d)){S.history.journal[d]=true;if(awardOnce('journal')){addXP(20);addStat('SEN',1);}markBest('journal');}
+  sfxOk();toast('loot','LOG SAVED','Hunter\'s Log quest cleared. The System reads you now.');checkPerfect();save();render();}
+
+function addGoal(){const t=document.getElementById('gTitle'),w=document.getElementById('gWhy');const tt=(t&&t.value||'').trim();if(!tt)return;S.quests.push({title:tt,why:(w&&w.value||'').trim(),milestones:[]});sfxOk();save();render();}
+function addMilestone(qi){const i=document.getElementById('msi_'+qi);const v=(i&&i.value||'').trim();if(!v)return;S.quests[qi].milestones.push({text:v,done:false});save();render();}
+function toggleMilestone(qi,mi){const m=S.quests[qi].milestones[mi];m.done=!m.done;if(m.done){addXP(40);sfxLoot();toast('loot','MILESTONE CLEARED','+40 XP toward your Main Quest.');}else{addXP(-40);}save();render();}
+
+/* ---------- focus dungeon ---------- */
+let focusTimer=null,focusEnd=0;
+function openFocus(){
+  focusEnd=Date.now()+25*60*1000;
+  const ov=document.createElement('div');ov.className='overlay';ov.id='focusOv';
+  ov.innerHTML=`<div class="panel modal focusview"><span class="cbr tr"></span><span class="cbr bl"></span>
+    <div class="sys-label">Focus Dungeon — Active Raid</div>
+    <div class="gatecircle" style="margin-top:18px"><div class="timer" id="ftime">25:00</div></div>
+    <p class="dim">Stay in. Phone down. Clear the dungeon and the Deep Work quest is yours. Leaving early forfeits the raid.</p>
+    <button class="bigbtn" data-act="focusDone" id="fdone" style="margin-top:10px;opacity:.6" disabled>Claim Reward</button>
+    <button class="bigbtn ghost" data-act="focusCancel" style="margin-top:8px">Abandon Raid</button>
+  </div>`;
+  document.body.appendChild(ov);
+  focusTimer=setInterval(()=>{
+    let s=Math.max(0,Math.round((focusEnd-Date.now())/1000));
+    const el=document.getElementById('ftime');if(el)el.textContent=String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
+    if(s<=0){clearInterval(focusTimer);const b=document.getElementById('fdone');if(b){b.disabled=false;b.style.opacity='1';b.textContent='✦ Claim Reward (Dungeon Cleared)';}sfxLevel();const g=document.querySelector('.gatecircle');if(g)g.style.borderColor='var(--ok)';}
+  },500);
+}
+function closeFocus(complete){if(focusTimer)clearInterval(focusTimer);const ov=document.getElementById('focusOv');if(ov)ov.remove();
+  if(complete){changeCount('deepwork',1);toast('loot','DUNGEON CLEARED','Deep Work raid complete. INT rising.');}
+  render();}
+
+/* ---------- settings / install ---------- */
+function openSettings(){
+  const ov=document.createElement('div');ov.className='overlay';ov.id='modal';
+  ov.innerHTML=`<div class="panel modal"><span class="cbr tr"></span><span class="cbr bl"></span>
+    <div class="between"><div class="sys-label">System Settings</div><div class="icbtn" data-act="closeModal">✕</div></div>
+    <div style="margin-top:14px"><div class="sys-label" style="margin-bottom:6px">Player Name</div><div class="row"><input id="setName" value="${esc(S.name)}" style="flex:1"><button class="minibtn" data-act="rename">SAVE</button></div></div>
+    <hr class="sep">
+    <div class="between"><div>Sound effects</div><button class="minibtn" data-act="soundtoggle">${S.sound?'ON':'OFF'}</button></div>
+    <hr class="sep">
+    <div class="between"><div>Install as app</div><button class="minibtn" data-act="install">HOW</button></div>
+    <hr class="sep">
+    <p class="muted-note">The System is a tool for momentum, not a replacement for real support. If things get heavy: <b>Vandrevala +91 9999 666 555</b> · <b>Tele-MANAS 14416</b> (24/7, India).</p>
+    <hr class="sep">
+    <button class="bigbtn ghost" data-act="reset" style="color:var(--bad);border-color:rgba(255,77,109,.4)">Reset all progress</button>
+  </div>`;
+  document.body.appendChild(ov);
+}
+function openInstall(){closeModal();const ov=document.createElement('div');ov.className='overlay';ov.id='modal';
+  ov.innerHTML=`<div class="panel modal"><span class="cbr tr"></span><span class="cbr bl"></span>
+   <div class="between"><div class="sys-label">Install THE SYSTEM</div><div class="icbtn" data-act="closeModal">✕</div></div>
+   <p style="margin-top:12px"><b style="color:var(--cyan)">iPhone / iPad (Safari):</b><br><span class="dim">Tap the Share button → <b>Add to Home Screen</b>. It opens fullscreen like a native app.</span></p>
+   <p><b style="color:var(--cyan)">Android (Chrome):</b><br><span class="dim">Menu (⋮) → <b>Add to Home screen / Install app</b>.</span></p>
+   <p><b style="color:var(--cyan)">Mac:</b><br><span class="dim">Open in Chrome → menu → <b>Save and Share → Install</b>, or just keep it pinned as a tab.</span></p>
+   <p class="muted-note">For the home-screen icon to work best, open this file through a browser (double-click it). Your progress is saved on the device automatically.</p>
+  </div>`;
+  document.body.appendChild(ov);
+}
+function closeModal(){const m=document.getElementById('modal');if(m)m.remove();}
+
+/* ---------- toast ---------- */
+function toast(kind,title,msg){const t=document.createElement('div');t.className='toast '+(kind||'');t.innerHTML=`<div class="tt">${title}</div><div style="margin-top:4px;font-size:14px">${msg}</div>`;document.body.appendChild(t);setTimeout(()=>{t.style.transition='.4s';t.style.opacity='0';t.style.transform='translate(-50%,-12px)';setTimeout(()=>t.remove(),400);},2600);}
+
+/* ---------- level up ---------- */
+function onLevelUp(lvl){sfxLevel();const rk=rankFor(lvl);
+  const ov=document.createElement('div');ov.className='overlay';ov.style.zIndex=250;
+  ov.innerHTML=`<div class="levelup"><div class="sys-label">System Notification</div><div class="big">LEVEL UP</div>
+    <div style="font-family:'Orbitron';font-size:28px;color:var(--cyan);margin-top:6px">LV ${lvl}</div>
+    <div class="dim" style="margin-top:8px">Rank ${rk.r} · The climb continues, ${esc(S.name)}.</div>
+    <button class="bigbtn" style="margin-top:18px;max-width:220px" onclick="this.closest('.overlay').remove()">Continue</button></div>`;
+  document.body.appendChild(ov);burst();}
+
+/* ---------- particle burst ---------- */
+const bc=document.getElementById('burst'),bx=bc.getContext('2d');let parts=[];
+function sz(){bc.width=innerWidth;bc.height=innerHeight;}sz();addEventListener('resize',sz);
+function burst(){const cx=innerWidth/2,cy=innerHeight/2;for(let i=0;i<90;i++){const a=Math.random()*Math.PI*2,sp=2+Math.random()*7;parts.push({x:cx,y:cy,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,life:1,c:['#37d6ff','#9b6bff','#ffcf5c','#37f9b0'][i%4]});}}
+function tick(){bx.clearRect(0,0,bc.width,bc.height);parts.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=0.12;p.life-=0.015;bx.globalAlpha=Math.max(0,p.life);bx.fillStyle=p.c;bx.fillRect(p.x,p.y,3,3);});parts=parts.filter(p=>p.life>0);requestAnimationFrame(tick);}tick();
+
+/* ---------- rollover / penalty ---------- */
+function rollover(){const today=todayISO();if(S.lastDate!==today){
+    // evaluate the last active day
+    if(dayPct(S.lastDate)<50){S.pending=S.pending||[];}
+    S.lastDate=today;S.awarded={};save();
+  }}
+
+/* ---------- util ---------- */
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+
+/* ---------- manifest (installability) ---------- */
+(function(){try{
+  const icon='data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192"><rect width="192" height="192" rx="36" fill="#05070f"/><rect x="20" y="20" width="152" height="152" rx="26" fill="none" stroke="#37d6ff" stroke-width="4"/><text x="96" y="120" font-family="Arial" font-size="92" font-weight="900" fill="#37d6ff" text-anchor="middle">S</text></svg>');
+  const manifest={name:'THE SYSTEM',short_name:'SYSTEM',display:'standalone',background_color:'#05070f',theme_color:'#05070f',start_url:'.',icons:[{src:icon,sizes:'192x192',type:'image/svg+xml'},{src:icon,sizes:'512x512',type:'image/svg+xml'}]};
+  const blob=new Blob([JSON.stringify(manifest)],{type:'application/json'});
+  const l=document.createElement('link');l.rel='manifest';l.href=URL.createObjectURL(blob);document.head.appendChild(l);
+  const al=document.createElement('link');al.rel='apple-touch-icon';al.href=icon;document.head.appendChild(al);
+}catch(e){}})();
+
+/* ---------- live timer refresh on quests ---------- */
+setInterval(()=>{if(S.seenIntro&&S.view==='quests'){const el=document.querySelector('.faint');}},1000);
+
+render();
+</script>
+</body>
+</html>
